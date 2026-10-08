@@ -128,7 +128,9 @@
     ul.appendChild(l);
   }
 
+  var lastRes = null;
   function render(r, raw, name, pages, info) {
+    lastRes = r;
     var out = $('cards'); out.textContent = ''; plan = []; renderPlan();
     var kind = { amendment: 'Notice of proposed IEP amendment', iep: 'IEP (goals and services)', clinical: 'Clinical letter (evaluation or treatment)', unknown: 'Document' }[r.type];
     $('docline').textContent = kind + ' · ' + pages + ' page' + (pages > 1 ? 's' : '') + ' · read in this browser' + (info && info.scanned ? ' · ' + info.scanned + ' scanned page' + (info.scanned > 1 ? 's' : '') + ' read with text recognition' : '') + (info && info.skipped ? ' · ' + info.skipped + ' scanned page(s) skipped, demo limit is ' + MAX_OCR_PAGES : '');
@@ -245,6 +247,15 @@
     var done = function () { $('plancopy').textContent = 'Copied'; setTimeout(function () { $('plancopy').textContent = 'Copy as text'; }, 1800); };
     if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, function () {});
   });
+
+  function makeForm(data, file) {
+    var st = $('formstatus'); st.textContent = 'Building the form…'; st.className = 'status';
+    window.SpecialMeForm.build(data).then(function (bytes) { window.SpecialMeForm.download(bytes, file); st.textContent = 'Downloaded ' + file + '.'; })
+      .catch(function () { st.textContent = 'Sorry, the form could not be built.'; st.className = 'status bad'; });
+  }
+  $('filled').addEventListener('click', function () { if (lastRes) makeForm(lastRes, 'SpecialMe-Care-Summary-prefilled.pdf'); });
+  $('blank2').addEventListener('click', function () { makeForm(null, 'SpecialMe-Care-Summary-blank.pdf'); });
+  $('blank').addEventListener('click', function () { makeForm(null, 'SpecialMe-Care-Summary-blank.pdf'); });
 
   // Upload wiring
   $('file').addEventListener('change', function (e) { handleFile(e.target.files[0]); e.target.value = ''; });
