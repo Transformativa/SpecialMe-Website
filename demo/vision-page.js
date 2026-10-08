@@ -6,7 +6,7 @@
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 
   function field(q) {
-    var fs = el('fieldset', 'q'), lg = el('legend', null, q.label); fs.appendChild(lg);
+    var fs = el('div', 'q'), lg = el('h3', 'qh', q.label); lg.id = 'lg_' + q.id; fs.setAttribute('role', q.type === 'text' || q.type === 'person' ? 'group' : (q.type === 'radio' ? 'radiogroup' : 'group')); fs.setAttribute('aria-labelledby', lg.id); fs.appendChild(lg);
     if (q.hint) fs.appendChild(el('p', 'hint', q.hint));
     if (q.type === 'text') { var i = el('input'); i.type = 'text'; i.id = 'q_' + q.id; i.maxLength = 240; i.setAttribute('aria-label', q.label); fs.appendChild(i); }
     else if (q.type === 'person') {
