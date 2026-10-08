@@ -154,6 +154,11 @@
       c = card('Dates mentioned');
       ul = el('ul', 'plain'); r.datesMentioned.forEach(function (x) { li(ul, X.pretty(x), { kind: 'Date', text: X.pretty(x) }); }); c.appendChild(ul); out.appendChild(c);
     }
+    if (r.noFutureDates) {
+      c = card('Key dates');
+      c.appendChild(el('p', null, 'All the dates in this document are in the past. In this demo we only look forward. In the full version, parents will be able to add progress reports and other earlier dates.'));
+      out.appendChild(c);
+    }
     if (r.deadlines.length) {
       c = card('Key dates', 'Check each date against your own copy.');
       ul = el('ul', 'plain');

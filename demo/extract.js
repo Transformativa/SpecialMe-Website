@@ -6,6 +6,10 @@
   var DATE = '(\\d{1,2}\\/\\d{1,2}\\/\\d{2,4})';
   var MONTHS = 'January|February|March|April|May|June|July|August|September|October|November|December';
 
+  var TODAY = null;
+  function startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+  function isFuture(str) { var d = toDate(str); return !!d && d >= (TODAY || startOfToday()); }
+
   function clean(t) {
     return String(t || '')
       .replace(/[   ]/g, ' ')
@@ -109,6 +113,8 @@
     var re = /Goal\s*(\d+)\s*[:.\-]\s*(.+?)(?=\s*Goal\s*\d+\s*[:.\-]|\s*(?:Services and supports|Service delivery|Progress reports?|Next steps|Accommodations)\b|$)/gi, m;
     while ((m = re.exec(f))) {
       var txt = m[2].trim();
+      // skip progress notes ("has met", "2.) ... 3.) ...") and anything that is not worded like a goal
+      if (/\b(has|have|had) (?:not )?(?:been )?(?:met|mastered|achieved|made)\b|\bnot met\b|\d\.\)/i.test(txt) || !/\bwill\b|\bwould\b|\bto (?:be|demonstrate|improve|increase|decrease)\b/i.test(txt) || txt.length > 420) continue;
       var by = /by\s+(\d{1,2}\/\d{1,2}\/\d{2,4})/i.exec(txt);
       goals.push({ n: +m[1], text: txt, by: by ? by[1] : '' });
     }
@@ -133,9 +139,9 @@
 
   function extractReports(t) {
     var f = flat(t);
-    var sec = first(/Progress reports?\s*(.+?)(?=\s*Next steps|$)/i, f);
+    var sec = first(/Progress reports?\s*(.{0,500}?)(?=\s*Next steps|$)/i, f);
     var dates = [], re = new RegExp(DATE, 'g'), m;
-    while ((m = re.exec(sec))) dates.push(m[1]);
+    while ((m = re.exec(sec))) if (dates.indexOf(m[1]) < 0) dates.push(m[1]);
     var freq = first(/reported to parents\s+([^.]+?)\./i, sec);
     return { frequency: freq, dates: dates };
   }
@@ -329,7 +335,8 @@
     return o;
   }
 
-  function analyze(raw) {
+  function analyze(raw, opts) {
+    TODAY = (opts && opts.today) || startOfToday();
     var rawClean = clean(raw), text = clean(plainOf(rawClean)), f = flat(text);
     var res = { chars: f.length, type: detectType(f) };
     if (isIepForm(f)) { res.type = 'iep'; res.form = analyzeIepForm(rawClean); }
@@ -359,6 +366,17 @@
       res.deadlines = res.deadlines.filter(function (d) { return !/Return the signed|review window/.test(d.label); });
       (F.services || []).forEach(function () {});
     }
+    // This demo only looks forward: keep today and later dates.
+    var seenAll = [];
+    [res.dates].forEach(function (o) { Object.keys(o || {}).forEach(function (k) { if (toDate(o[k])) seenAll.push(o[k]); }); });
+    (res.deadlines || []).forEach(function (d) { seenAll.push(d.date); });
+    (res.datesMentioned || []).forEach(function (d) { seenAll.push(d); });
+    ((res.reports && res.reports.dates) || []).forEach(function (d) { seenAll.push(d); });
+    res.deadlines = (res.deadlines || []).filter(function (d) { return isFuture(d.date); });
+    res.datesMentioned = (res.datesMentioned || []).filter(function (d) { return !toDate(d) || isFuture(d); });
+    if (res.reports) res.reports.dates = res.reports.dates.filter(isFuture).slice(0, 6);
+    var dated = seenAll.filter(function (d) { return toDate(d); }).length;
+    res.noFutureDates = dated > 0 && !res.deadlines.length && !res.datesMentioned.length && !(res.reports && res.reports.dates.length);
     res.actions = buildActions(res);
     res.summary = buildSummary(res);
     res.found = (res.diagnoses.length ? 1 : 0) + (res.recommendations.length ? 1 : 0) + (res.goals.length ? 1 : 0) + (res.services.length ? 1 : 0) + res.deadlines.length + (res.change.change ? 1 : 0);
@@ -407,7 +425,8 @@
     var d = r.dates || {};
     if (r.type === 'amendment') {
       a.push('Read the proposed change and decide: accept, reject part, or reject all.');
-      if (d.returnDate) a.push('Sign and return the response page by ' + pretty(d.returnDate) + '.');
+      if (d.returnDate && isFuture(d.returnDate)) a.push('Sign and return the response page by ' + pretty(d.returnDate) + '.');
+      else if (d.returnDate) a.push('The return date on this notice (' + pretty(d.returnDate) + ') has passed. Ask the contact whether your response is still open.');
       else a.push('Sign and return the response page. Check the notice for the due date.');
       a.push('If you disagree with any part, write that on the response page and ask for a meeting.');
       if (r.contact && (r.contact.email || r.contact.phone)) a.push('Questions: contact ' + (r.contact.name ? r.contact.name + ' ' : 'the district contact ') + [r.contact.phone, r.contact.email].filter(Boolean).join(' or ') + '.');
@@ -417,7 +436,8 @@
       if (F.services.length) a.push('Confirm each service (minutes, how often, who provides it) matches what was agreed at the meeting.');
       if (F.progress) a.push('Progress reports: ' + F.progress);
       a.push('Read the response section at the end. Accept, reject part, or reject all, and sign and return it to the district.');
-      a.push('Keep a signed copy and put the next annual review date in your calendar.');
+      if (d.annualReview && !isFuture(d.annualReview)) a.push('The annual review date on this IEP (' + pretty(d.annualReview) + ') has passed. Ask the school for the current IEP and the next meeting date.');
+      else a.push('Keep a signed copy and put the next annual review date in your calendar.');
     } else if (r.type === 'iep') {
       if (r.reports && r.reports.dates.length) a.push('Watch for progress reports on ' + r.reports.dates.map(pretty).join(' and ') + '.');
       a.push('Check each goal for a clear way to measure it, and ask how progress will be shown.');
@@ -441,7 +461,7 @@
       if (what) L.push('What is changing: ' + trim(what, 260) + (r.change.jumbled ? ' (The table in this file reads out of order, so the wording may be mixed. Check the original.)' : ''));
       if (r.change.why) L.push('Why: ' + trim(r.change.why, 220));
       if (r.narrative && r.narrative.basis) L.push('Based on: ' + trim(r.narrative.basis, 220));
-      if (d.returnDate) L.push('Due: your signed response is due ' + pretty(d.returnDate) + '.');
+      if (d.returnDate) L.push(isFuture(d.returnDate) ? 'Due: your signed response is due ' + pretty(d.returnDate) + '.' : 'The date to return your response, ' + pretty(d.returnDate) + ', has passed.');
       if (d.iepFrom && d.iepTo) L.push('It attaches to the IEP running ' + pretty(d.iepFrom) + ' to ' + pretty(d.iepTo) + '.');
     } else if (r.type === 'iep' && r.form) {
       var F = r.form;
@@ -468,7 +488,7 @@
   }
   function trim(s, n) { s = flat(s); return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s; }
 
-  var api = { analyze: analyze, stripRepeats: stripRepeats, clean: clean, pretty: pretty, toDate: toDate };
+  var api = { analyze: analyze, isFuture: isFuture, stripRepeats: stripRepeats, clean: clean, pretty: pretty, toDate: toDate };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.SpecialMeExtract = api;
 })(typeof self !== 'undefined' ? self : this);
