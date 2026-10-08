@@ -5,7 +5,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var X = window.SpecialMeExtract, pdfjs = window.pdfjsLib;
   pdfjs.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js';
-  var MAX_BYTES = 15 * 1024 * 1024, MAX_PAGES = 40;
+  var MAX_BYTES = 20 * 1024 * 1024, MAX_PAGES = 40;
   var plan = [];
 
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -101,7 +101,7 @@
   function handleFile(file) {
     if (!file) return;
     if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') { say('Please choose a PDF file.', 'bad'); return; }
-    if (file.size > MAX_BYTES) { say('That file is larger than 15 MB. Please try a smaller one.', 'bad'); return; }
+    if (file.size > MAX_BYTES) { say('That file is larger than 20 MB. Please try a smaller one.', 'bad'); return; }
     file.arrayBuffer().then(function (b) { handleBuffer(b, 'your file'); });
   }
 
