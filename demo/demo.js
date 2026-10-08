@@ -41,7 +41,7 @@
     });
   }
 
-  var MAX_OCR_PAGES = 12, ocrWorker = null;
+  var MAX_OCR_PAGES = 40, ocrWorker = null;
   function loadScript(src) {
     return new Promise(function (ok, bad) { var t = document.createElement('script'); t.src = src; t.onload = ok; t.onerror = bad; document.head.appendChild(t); });
   }
@@ -65,7 +65,41 @@
     }).then(function (w) {
       say(label);
       return w.recognize(cv);
-    }).then(function (r) { cv.width = cv.height = 0; return r.data.text || ''; });
+    }).then(function (r) {
+      var sx = vp0.width / cv.width, sy = vp0.height / cv.height, d = r.data, out;
+      cv.width = cv.height = 0;
+      try { out = ocrRows(d, sx, sy); } catch (e) { out = ''; }
+      return out && out.replace(/\s/g, '').length >= 20 ? out : (d.text || '');
+    });
+  }
+  // Turn OCR words into the same column-marked rows that pageText builds for text PDFs (so form pages parse the same way).
+  function ocrRows(d, sx, sy) {
+    var lines = d.lines || [], L = [];
+    lines.forEach(function (ln) {
+      var ws = (ln.words || []).filter(function (w) { return w.text && w.text.trim() && (w.confidence == null || w.confidence >= 30); }).map(function (w) {
+        return { x: w.bbox.x0 * sx, w: (w.bbox.x1 - w.bbox.x0) * sx, y: (w.bbox.y0 + w.bbox.y1) / 2 * sy, s: w.text.trim() };
+      });
+      if (!ws.length) return;
+      ws.sort(function (a, b) { return a.x - b.x; });
+      L.push({ y: ws.reduce(function (a, w) { return a + w.y; }, 0) / ws.length, ws: ws });
+    });
+    L.sort(function (a, b) { return a.y - b.y; });
+    var rows = [];
+    L.forEach(function (l) {
+      var r = rows[rows.length - 1];
+      if (r && Math.abs(r.y - l.y) <= 3.5) { r.ws = r.ws.concat(l.ws).sort(function (a, b) { return a.x - b.x; }); }
+      else rows.push({ y: l.y, ws: l.ws.slice() });
+    });
+    return rows.map(function (r) {
+      var s = '', prevEnd = null;
+      r.ws.forEach(function (p, i) {
+        var gap = prevEnd == null ? 99 : p.x - prevEnd;
+        if (gap > 12) s += (i ? ' ' : '') + '\u2016' + Math.round(p.x) + '\u2016' + p.s;
+        else s += (gap > 0.5 ? ' ' : '') + p.s;
+        prevEnd = p.x + p.w;
+      });
+      return s;
+    }).join('\n');
   }
 
   function readPdf(buf) {
