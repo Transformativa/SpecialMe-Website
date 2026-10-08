@@ -44,6 +44,8 @@
     var iep = /Annual goals?|Present levels|Services and supports|Service delivery/i.test(f) && /goal/i.test(f);
     if (iep && !/Notice of Proposed School District Action/i.test(f)) return 'iep';
     if (amend) return 'amendment';
+    var clin = (f.match(/diagnos|evaluation|assessment|treatment plan|recommend|therapy|disorder|autism|ADHD|pediatric|clinic/gi) || []).length;
+    if (!iep && clin >= 3) return 'clinical';
     if (iep) return 'iep';
     return 'unknown';
   }
@@ -165,10 +167,53 @@
     res.presentLevels = extractPresentLevels(text);
     res.reports = extractReports(text);
     res.deadlines = buildDeadlines(res.dates, res.type, text);
+    res.diagnoses = extractDiagnoses(f);
+    res.recommendations = (res.type === 'clinical' || res.type === 'unknown') ? extractRecommendations(text) : [];
+    res.hours = extractHours(f);
+    res.keySentences = (res.type === 'clinical' || res.type === 'unknown') ? keySentences(text) : [];
+    res.datesMentioned = (res.type === 'clinical' || res.type === 'unknown') ? allDates(f) : [];
+    if (res.type === 'clinical' && !res.services.length) res.services = res.hours;
     res.actions = buildActions(res);
     res.summary = buildSummary(res);
-    res.found = (res.goals.length ? 1 : 0) + (res.services.length ? 1 : 0) + res.deadlines.length + (res.change.change ? 1 : 0);
+    res.found = (res.diagnoses.length ? 1 : 0) + (res.recommendations.length ? 1 : 0) + (res.goals.length ? 1 : 0) + (res.services.length ? 1 : 0) + res.deadlines.length + (res.change.change ? 1 : 0);
     return res;
+  }
+
+  var DX = /\b(Autism Spectrum Disorder|ASD|Attention[- ]Deficit(?:\/| and )?Hyperactivity Disorder|ADHD|Intellectual Disability|Global Developmental Delay|Developmental Delay|Speech(?: and Language)? (?:Delay|Disorder)|Language Disorder|Anxiety(?: Disorder)?|Epilepsy|Cerebral Palsy|Down Syndrome|Sensory Processing(?: Disorder)?|Dyslexia|Apraxia(?: of Speech)?|Oppositional Defiant Disorder|Learning Disorder)\b/g;
+  var ABBR = { ASD: 'Autism Spectrum Disorder', ADHD: 'ADHD', ID: 'Intellectual Disability', GDD: 'Global Developmental Delay' };
+
+  function extractDiagnoses(f) {
+    var seen = {}, out = [], m;
+    DX.lastIndex = 0;
+    while ((m = DX.exec(f))) {
+      var k = (ABBR[m[1]] || m[1]).toLowerCase();
+      if (seen[k]) continue;
+      var ctx = f.slice(Math.max(0, m.index - 120), m.index).split(/[.;]\s/).pop();
+      if (/not (?:better )?explained by|rule[sd]? out|no evidence of|negative for|without (?:a |any )?(?:diagnosis|history) of/i.test(ctx)) continue; // mentioned only to be excluded
+      seen[k] = 1; out.push(ABBR[m[1]] || m[1]);
+    }
+    return out;
+  }
+  function extractRecommendations(t) {
+    var re = /\b(recommend|imperative|essential|should|must|need(?:s)? to|requires?|referr|follow[- ]up|consistent|ongoing|strongly)/i;
+    return sentences(t).filter(function (x) { return re.test(x) && x.length > 25 && x.length < 420 && !/^\s*(?:Sincerely|Thank)/i.test(x); }).slice(0, 8);
+  }
+  function extractHours(f) {
+    var out = [], re = /(\d+(?:\s*[–\-]\s*\d+)?)\s*(hours?|minutes?|sessions?)\s+(?:of\s+)?([A-Za-z][A-Za-z\- ]{1,40}?)\s+(?:per|a|each|every)\s+(week|day|month)/gi, m;
+    while ((m = re.exec(f))) out.push({ name: m[3].trim(), detail: m[1].replace(/\s+/g, '') + ' ' + m[2] + ' per ' + m[4] });
+    var re2 = /recommendation is\s+(\d+(?:\s*[–\-]\s*\d+)?)\s*(hours?)\s+of\s+([A-Za-z][A-Za-z\- ]{1,40}?)\s+per\s+(week|day|month)/gi;
+    return out;
+  }
+  function allDates(f) {
+    var out = [], seen = {}, re = new RegExp(DATE + '|(?:' + MONTHS + ')\\s+\\d{1,2},\\s+\\d{4}', 'g'), m;
+    while ((m = re.exec(f))) { if (!seen[m[0]]) { seen[m[0]] = 1; out.push(m[0]); } }
+    return out.slice(0, 8);
+  }
+  function keySentences(t) {
+    var ss = sentences(t).filter(function (x) { return x.length > 40 && x.length < 400; });
+    var KW = /diagnos|recommend|treatment|therapy|goal|plan|require|support|skill|behavior|language|progress|result|score|meets? criteria|concern|important|deficit|delay/i;
+    var scored = ss.map(function (x, i) { return { x: x, i: i, s: (KW.test(x) ? 2 : 0) + (i < 3 ? 1 : 0) + (/\d/.test(x) ? 0.5 : 0) }; });
+    return scored.sort(function (a, b) { return b.s - a.s || a.i - b.i; }).slice(0, 5).sort(function (a, b) { return a.i - b.i; }).map(function (o) { return o.x; });
   }
 
   function buildActions(r) {
@@ -184,6 +229,13 @@
       if (r.reports && r.reports.dates.length) a.push('Watch for progress reports on ' + r.reports.dates.map(pretty).join(' and ') + '.');
       a.push('Check each goal for a clear way to measure it, and ask how progress will be shown.');
       a.push('Return the signed response page if the document asks for one.');
+    }
+    else if (r.type === 'clinical') {
+      if (r.hours && r.hours.length) a.push('Ask who will provide ' + r.hours.map(function (h) { return h.detail + ' of ' + h.name; }).join(' and ') + ', and how to start (insurance, waitlist, referral).');
+      else a.push('Ask the provider what the next step is and how to start.');
+      a.push('Share this letter with your child\'s school team and ask how it fits the IEP.');
+      a.push('Keep this letter with your records. Insurers and schools often ask for it.');
+      if (r.contact && (r.contact.phone || r.contact.email)) a.push('Questions: call or email ' + [r.contact.phone, r.contact.email].filter(Boolean).join(' or ') + '.');
     }
     return a;
   }
@@ -203,8 +255,14 @@
       if (r.presentLevels) L.push('Where things stand now: ' + trim(r.presentLevels, 260));
       if (r.goals.length) L.push(r.goals.length + ' annual goal' + (r.goals.length > 1 ? 's' : '') + ' found.');
       if (r.services.length) L.push(r.services.length + ' service' + (r.services.length > 1 ? 's' : '') + ' found' + (r.accommodations.length ? ', plus ' + r.accommodations.length + ' accommodations.' : '.'));
+    } else if (r.type === 'clinical') {
+      L.push('This looks like a letter from a clinician about an evaluation, diagnosis or treatment.');
+      if (r.diagnoses.length) L.push('Conditions named: ' + r.diagnoses.join(', ') + '.');
+      if (r.hours && r.hours.length) L.push('Recommended: ' + r.hours.map(function (h) { return h.detail + ' of ' + h.name; }).join('; ') + '.');
+      if (r.recommendations.length) L.push('Main point: ' + trim(r.recommendations[0], 260));
     } else {
-      L.push('We could not tell what kind of document this is. Here is what we found anyway.');
+      L.push('We could not tell exactly what kind of document this is, so here are the sentences that look most important.');
+      r.keySentences.slice(0, 3).forEach(function (x) { L.push(trim(x, 240)); });
     }
     return L;
   }

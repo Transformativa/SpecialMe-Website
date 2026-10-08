@@ -82,12 +82,28 @@
 
   function render(r, raw, name, pages) {
     var out = $('cards'); out.textContent = ''; plan = []; renderPlan();
-    var kind = { amendment: 'Notice of proposed IEP amendment', iep: 'IEP (goals and services)', unknown: 'Document' }[r.type];
+    var kind = { amendment: 'Notice of proposed IEP amendment', iep: 'IEP (goals and services)', clinical: 'Clinical letter (evaluation or treatment)', unknown: 'Document' }[r.type];
     $('docline').textContent = kind + ' · ' + pages + ' page' + (pages > 1 ? 's' : '') + ' · read in this browser';
 
     var c = card('Summary in plain words');
     var ul = el('ul', 'plain'); r.summary.forEach(function (s) { li(ul, s); }); c.appendChild(ul); out.appendChild(c);
 
+    if (r.diagnoses && r.diagnoses.length) {
+      c = card('Conditions named', 'Only what the letter says. This is not a diagnosis from us.');
+      ul = el('ul', 'plain'); r.diagnoses.forEach(function (x) { li(ul, x); }); c.appendChild(ul); out.appendChild(c);
+    }
+    if (r.recommendations && r.recommendations.length) {
+      c = card('What the writer recommends', 'Sentences from the letter that sound like advice or a request.');
+      ul = el('ul', 'plain'); r.recommendations.forEach(function (x) { li(ul, x, { kind: 'Recommendation', text: x }); }); c.appendChild(ul); out.appendChild(c);
+    }
+    if (r.type === 'unknown' && r.keySentences && r.keySentences.length) {
+      c = card('Sentences that look important');
+      ul = el('ul', 'plain'); r.keySentences.forEach(function (x) { li(ul, x); }); c.appendChild(ul); out.appendChild(c);
+    }
+    if (r.datesMentioned && r.datesMentioned.length) {
+      c = card('Dates mentioned');
+      ul = el('ul', 'plain'); r.datesMentioned.forEach(function (x) { li(ul, X.pretty(x), { kind: 'Date', text: X.pretty(x) }); }); c.appendChild(ul); out.appendChild(c);
+    }
     if (r.deadlines.length) {
       c = card('Key dates', 'Check each date against your own copy.');
       ul = el('ul', 'plain');
@@ -150,6 +166,7 @@
   ['dragleave', 'drop'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.remove('over'); }); });
   dz.addEventListener('drop', function (e) { handleFile(e.dataTransfer.files[0]); });
   $('s1').addEventListener('click', function () { loadSample('samples/sample-amendment-notice.pdf', 'sample notice'); });
+  $('s3').addEventListener('click', function () { loadSample('samples/sample-clinical-letter.pdf', 'sample clinical letter'); });
   $('s2').addEventListener('click', function () { loadSample('samples/sample-iep-goals.pdf', 'sample IEP'); });
 
   // Trial sign-up (same table as the main site, tagged source = demo)
