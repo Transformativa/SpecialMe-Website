@@ -330,8 +330,8 @@
       });
     }
     // additional information
-    var add = between(text, /ADDITIONAL INFORMATION[\s\S]*?(?:and services\)\.|not addressed through IEP goals[^\n]*\n)/, /RESPONSE SECTION/);
-    o.additional = add.split(/\n\s*\n/).map(function (x) { return firstSentences(x.replace(/\s+/g, ' '), 260, 2); }).filter(function (x) { return x.length > 25; }).slice(0, 6);
+    var add = between(text, /ADDITIONAL INFORMATION/, /RESPONSE SECTION/).replace(/^[\s\S]*?and services\)\.\s*/, '').replace(/^Record other IEP information[\s\S]*?\)\.\s*/, '');
+    o.additional = sentences(plainOf(add)).filter(function (x) { return x.length > 25; }).map(function (x) { return x.length > 280 ? x.slice(0, 279).replace(/\s+\S*$/, '') + '…' : x; }).slice(0, 10);
     return o;
   }
 

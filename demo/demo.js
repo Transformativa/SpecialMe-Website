@@ -195,9 +195,6 @@
       c = card('Who to contact');
       c.appendChild(el('p', null, [r.contact.name, r.contact.phone, r.contact.email].filter(Boolean).join(' · '))); out.appendChild(c);
     }
-    var d = el('details', 'raw'); d.appendChild(el('summary', null, 'Show the text the demo read (' + raw.length + ' characters)'));
-    var pre = el('pre', null, raw); d.appendChild(pre); out.appendChild(d);
-
     $('results').hidden = false;
     $('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
