@@ -18,7 +18,7 @@
       tc.items.forEach(function (it) {
         if (!it.str || !it.str.trim()) return;
         var t = pdfjs.Util.transform(vp.transform, it.transform); // handles rotated pages
-        items.push({ x: t[4], y: t[5], s: it.str });
+        items.push({ x: t[4], y: t[5], s: it.str, w: it.width * (vp.scale || 1) });
       });
       items.sort(function (a, b) { return a.y - b.y; });
       var rows = [];
@@ -27,7 +27,17 @@
         if (r && Math.abs(r.y - it.y) <= 3.5) { r.parts.push(it); r.y = (r.y * (r.parts.length - 1) + it.y) / r.parts.length; }
         else rows.push({ y: it.y, parts: [it] });
       });
-      return rows.map(function (r) { r.parts.sort(function (a, b) { return a.x - b.x; }); return r.parts.map(function (p) { return p.s; }).join(' '); }).join('\n');
+      return rows.map(function (r) {
+        r.parts.sort(function (a, b) { return a.x - b.x; });
+        var s = '', prevEnd = null;
+        r.parts.forEach(function (p, i) {
+          var gap = prevEnd == null ? 99 : p.x - prevEnd;
+          if (gap > 12) s += (i ? ' ' : '') + '\u2016' + Math.round(p.x) + '\u2016' + p.s; // new column segment
+          else s += (gap > 0.5 ? ' ' : '') + p.s;
+          prevEnd = p.x + p.w;
+        });
+        return s;
+      }).join('\n');
     });
   }
 
@@ -73,7 +83,7 @@
         });
       }
       for (var i = 1; i <= n; i++) (function (k) { chain = chain.then(function () { return step(k); }); })(i);
-      return chain.then(function () { return { text: pages.join('\n\n'), pages: doc.numPages, scanned: scanned, skipped: skipped }; });
+      return chain.then(function () { return { text: X.stripRepeats(pages.map(function (p) { return p || ''; })).join('\n\n'), pages: doc.numPages, scanned: scanned, skipped: skipped }; });
     });
   }
 
@@ -154,22 +164,23 @@
       c = card('What to do next');
       ul = el('ul', 'plain'); r.actions.forEach(function (a) { li(ul, a, { kind: 'To do', text: a }); }); c.appendChild(ul); out.appendChild(c);
     }
-    if (r.goals.length) {
+    if (r.form) { renderForm(out, r); }
+    else if (r.goals.length) {
       c = card('Annual goals', r.goals.length + ' found');
       ul = el('ul', 'plain'); r.goals.forEach(function (g) { li(ul, 'Goal ' + g.n + ': ' + g.text, { kind: 'Goal', text: g.text }); }); c.appendChild(ul); out.appendChild(c);
     }
-    if (r.services.length || r.accommodations.length) {
+    if (!r.form && (r.services.length || r.accommodations.length)) {
       c = card('Services and supports');
       ul = el('ul', 'plain');
       r.services.forEach(function (s) { li(ul, s.name + ': ' + s.detail, { kind: 'Service', text: s.name + ': ' + s.detail }); });
       r.accommodations.forEach(function (a) { li(ul, 'Accommodation: ' + a, { kind: 'Accommodation', text: a }); });
       c.appendChild(ul); out.appendChild(c);
     }
-    if (r.presentLevels) {
+    if (!r.form && r.presentLevels) {
       c = card('Where things stand now', 'From the "present levels" section.');
       c.appendChild(el('p', null, r.presentLevels)); out.appendChild(c);
     }
-    if (r.reports && r.reports.dates.length) {
+    if (!r.form && r.reports && r.reports.dates.length) {
       c = card('Progress reports', r.reports.frequency ? 'Reported ' + r.reports.frequency + '.' : '');
       ul = el('ul', 'plain'); r.reports.dates.forEach(function (d) { li(ul, 'Report due ' + X.pretty(d), { kind: 'Date', text: 'Progress report due ' + X.pretty(d) }); }); c.appendChild(ul); out.appendChild(c);
     }
@@ -182,6 +193,44 @@
 
     $('results').hidden = false;
     $('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function renderForm(out, r) {
+    var F = r.form, c, ul;
+    if (F.concerns) { c = card('What the family asked the IEP to address', 'First lines of the concerns section.'); c.appendChild(el('p', null, F.concerns)); out.appendChild(c); }
+    if (F.levels.length) {
+      c = card('Where things stand now', 'Short excerpts. The full text is in your document.');
+      F.levels.forEach(function (l) { var p = el('p', null); p.appendChild(el('b', null, l.area + ': ')); p.appendChild(document.createTextNode(l.text)); p.style.marginTop = '10px'; c.appendChild(p); });
+      out.appendChild(c);
+    }
+    if (F.goals.length) {
+      c = card('Annual goals', F.goals.length + ' goals. Open one to see the steps toward it.');
+      F.goals.forEach(function (g) {
+        var det = el('details', 'goal'), sm = el('summary', null, 'Goal ' + g.n + ': ' + g.area); det.appendChild(sm);
+        if (g.text) det.appendChild(el('p', null, g.text));
+        if (g.criteria) det.appendChild(el('p', 'hint', 'How success is measured: ' + g.criteria));
+        if (g.baseline) { var b = el('p', 'hint'); b.appendChild(el('b', null, 'Where things stand: ')); b.appendChild(document.createTextNode(g.baseline)); det.appendChild(b); }
+        if (g.objectives.length) { var u = el('ul', 'plain'); g.objectives.forEach(function (o) { li(u, o); }); det.appendChild(u); }
+        var add = addBtn(det, 'Goal ' + g.n, { kind: 'Goal', text: g.area + (g.text ? ': ' + g.text : '') }); add.style.marginTop = '8px'; det.appendChild(add);
+        c.appendChild(det);
+      });
+      out.appendChild(c);
+    }
+    if (F.services.length) {
+      c = card('Services', 'Check each line against the original. Minutes per week can overlap, so do not add them up.');
+      ul = el('ul', 'plain');
+      F.services.forEach(function (s) { li(ul, s.name + ': ' + s.detail + (s.by ? ' (' + s.by + ')' : '') + (s.where ? ', ' + s.where : ''), { kind: 'Service', text: s.name + ': ' + s.detail }); });
+      c.appendChild(ul); out.appendChild(c);
+    }
+    if (F.accommodations.length) {
+      c = card('Accommodations', F.accommodations.length + ' found');
+      ul = el('ul', 'plain'); F.accommodations.slice(0, 40).forEach(function (a) { li(ul, a, { kind: 'Accommodation', text: a }); }); c.appendChild(ul); out.appendChild(c);
+    }
+    if (F.progress) { c = card('Progress reports'); c.appendChild(el('p', null, F.progress)); out.appendChild(c); }
+    if (F.additional.length) {
+      c = card('Also important to know');
+      ul = el('ul', 'plain'); F.additional.forEach(function (a) { li(ul, a); }); c.appendChild(ul); out.appendChild(c);
+    }
   }
 
   function addToPlan(item) { plan.push(item); renderPlan(); }
