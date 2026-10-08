@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Try the SpecialMe demo: pick a PDF and see the key dates, goals and next steps pulled out. It runs in your browser and nothing is uploaded.">
+<meta name="description" content="Answer a few questions and get a draft Parent Vision and Child Vision for an IEP meeting. It runs in your browser and nothing is uploaded.">
 <meta name="color-scheme" content="light dark">
-<title>SpecialMe demo</title>
+<title>Vision builder | SpecialMe demo</title>
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="icon" href="../favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <meta name="theme-color" content="#0B3A42">
 <meta property="og:type" content="website"><meta property="og:site_name" content="SpecialMe">
-<meta property="og:title" content="SpecialMe demo"><meta property="og:description" content="Pick a PDF and see the key dates, goals and next steps pulled out. It runs in your browser and nothing is uploaded.">
+<meta property="og:title" content="Vision builder | SpecialMe demo"><meta property="og:description" content="Answer a few questions and get a draft Parent Vision and Child Vision for an IEP meeting. It runs in your browser and nothing is uploaded.">
 <meta property="og:image" content="https://specialme.app/og-image.png"><meta name="twitter:card" content="summary_large_image">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -147,49 +147,34 @@ textarea.doc{width:100%;min-height:320px;font:inherit;line-height:1.6;color:var(
 <div class="wrap">
   <header class="top"><a class="mark" href="../" aria-label="SpecialMe home"><svg class="lg tile" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#0B3A42"/><circle cx="32" cy="23" r="8" fill="#F2C14E"/><path d="M14 36A18 18 0 0 0 50 36" fill="none" stroke="#5BC8D4" stroke-width="5" stroke-linecap="round"/></svg><svg class="lg mono" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="23" r="8" fill="#E8F4F6"/><path d="M14 36A18 18 0 0 0 50 36" fill="none" stroke="#E8F4F6" stroke-width="5" stroke-linecap="round"/></svg><span>Special<b>Me</b></span></a><a class="btn small" href="#join">Join the trial</a></header>
   <section class="blk">
-    <nav class="tabs" aria-label="Demo options"><a href="./" aria-current="page">Read a document</a><a href="strength.html">IEP strength check</a><a href="vision.html">Vision builder</a></nav>
+    <nav class="tabs" aria-label="Demo options"><a href="./">Read a document</a><a href="strength.html">IEP strength check</a><a href="vision.html" aria-current="page">Vision builder</a></nav>
     <p class="kicker" style="margin-top:22px">Demo</p>
-    <h1>See what SpecialMe pulls out of a school document.</h1>
-    <p class="lede">Choose a PDF, like an IEP, a notice from the school, or a letter from a clinic. In a few seconds you get the key dates, goals, services and next steps in plain words.</p>
+    <h1>Write a vision for your child, with your child.</h1>
+    <p class="lede">Answer a few questions and SpecialMe drafts two short pages for an IEP meeting: a Parent Vision and, in your child&rsquo;s voice, a Child&rsquo;s Vision. You can edit both before you save them.</p>
     <div class="banners">
-      <p class="note"><b>Your file stays on your device.</b> It is read inside this web page. It is not uploaded, saved or sent to us.</p>
-      <p class="note"><b>This demo does not use AI.</b> It looks for the usual headings and wording in these forms, so it can miss things. Scanned pages are read with text recognition, which can make mistakes. The full app will do more and will always show you where each item came from.</p>
-      <p class="note warn"><b>Please do not use a real record yet.</b> We have not finished our privacy and security review for family records. Use the sample documents below, or a copy with names and ID numbers removed.</p>
+      <p class="note"><b>Everything stays on your device.</b> Your answers are used only on this page. They are not uploaded or saved, and they are gone when you close it.</p>
+      <p class="note"><b>This demo does not use AI.</b> It places your answers into sentence templates, so please read and edit the draft until it sounds like you.</p>
+      <p class="note warn"><b>Use a first name or nickname only.</b> Please leave out last names, school names, ID numbers and diagnoses you are not ready to share.</p>
     </div>
-
-    <div class="drop" id="drop">
-      <p>Drop a PDF here, or choose one (up to 20 MB).</p>
-      <div class="row">
-        <label class="btn" for="file" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">Choose a PDF</label>
-        <input id="file" type="file" accept="application/pdf,.pdf">
-        <button class="btn ghost" id="s1" type="button">Try the sample notice</button>
-        <button class="btn ghost" id="s2" type="button">Try the sample IEP</button>
-        <button class="btn ghost" id="s3" type="button">Try the sample clinical letter</button>
-        <button class="btn ghost" id="s4" type="button">Try a sample scan</button>
-      </div>
-      <p class="samples"><button class="linklike" id="blank" type="button">Download the blank Care Summary form</button> (fillable PDF)<br>Samples are made up. Download them: <a href="samples/sample-amendment-notice.pdf" download>notice</a> · <a href="samples/sample-iep-goals.pdf" download>IEP</a> · <a href="samples/sample-clinical-letter.pdf" download>clinical letter</a> · <a href="samples/sample-scanned-letter.pdf" download>scan</a></p>
-    </div>
-    <p class="status" id="status" role="status" aria-live="polite"></p>
   </section>
-
-  <section class="blk" id="results" hidden>
-    <h2>What we found</h2>
-    <p class="docline" id="docline"></p>
-    <div class="formbar">
-      <div><b>Care Summary form</b><p class="hint">A one-page fillable PDF for schools, clinics and caregivers. The pre-filled copy uses only what this page found in your document. The demo does not use AI, so the copy may be incomplete or wrong. Check it before you share it.</p></div>
-      <div class="row" style="justify-content:flex-start"><button class="btn small" id="filled" type="button">Download pre-filled form</button><button class="btn small ghost" id="blank2" type="button">Download blank form</button></div>
-      <p class="status" id="formstatus" role="status" aria-live="polite" style="text-align:left;margin-top:8px"></p>
-    </div>
-    <div class="cards" id="cards"></div>
-    <div id="plan" hidden>
-      <h3>My plan</h3>
-      <ul id="planlist"></ul>
-      <div class="row" style="justify-content:flex-start"><button class="btn small" id="planprint" type="button">Print</button><button class="btn small ghost" id="plancopy" type="button">Copy as text</button></div>
-      <p class="hint">This list is only on this page. It disappears when you close it. The full app will keep it for you.</p>
-    </div>
+  <section class="blk vform" style="padding-top:0">
+    <form id="vform" novalidate>
+      <div class="vgrid" style="grid-template-columns:1fr 200px"><label for="vname">First name or nickname<input id="vname" type="text" maxlength="40" autocomplete="off" style="font:inherit;min-height:46px;border:2px solid var(--line);border-radius:12px;padding:0 12px;background:var(--bg);color:var(--ink)"></label>
+      <label for="vpro">Pronouns<select id="vpro" style="font:inherit;min-height:46px;border:2px solid var(--line);border-radius:12px;padding:0 12px;background:var(--bg);color:var(--ink)"><option value="they">they / them</option><option value="he">he / him</option><option value="she">she / her</option></select></label></div>
+      <h2 style="margin:18px 0 10px">Parent questions</h2><div id="pq"></div>
+      <h2 style="margin:26px 0 4px">Child questions</h2><p class="hint" style="margin-bottom:12px">Ask your child, or answer together. Use their own words where you can. Skip any that do not fit.</p><div id="cq"></div>
+      <div class="row" style="justify-content:flex-start"><button class="btn" type="submit">Write the draft</button></div>
+    </form>
+  </section>
+  <section class="blk" id="out" hidden style="padding-top:0">
+    <h2>Your drafts</h2>
+    <p class="hint">Click in a box to change the words. Nothing is saved until you download it.</p>
+    <div class="pgrp"><h3 id="pt"></h3><label class="hint" for="pdoc" style="display:block;margin:6px 0">Parent vision text</label><textarea class="doc" id="pdoc"></textarea></div>
+    <div class="pgrp"><h3 id="ct"></h3><label class="hint" for="cdoc" style="display:block;margin:6px 0">Child vision text</label><textarea class="doc" id="cdoc" style="min-height:220px"></textarea></div>
+    <div class="row vtools" style="justify-content:flex-start;margin-top:18px"><button class="btn" id="vpdf" type="button">Download as PDF</button><button class="btn ghost" id="vcopy" type="button">Copy both as text</button><button class="btn ghost" id="vprint" type="button">Print</button></div>
+    <p class="status" id="vstatus" role="status" aria-live="polite" style="text-align:left"></p>
   </section>
 </div>
-
 <section class="join blk" id="join">
   <div class="wrap">
     <p class="kicker" style="color:var(--deep-muted)">Trial</p>
@@ -222,10 +207,9 @@ textarea.doc{width:100%;min-height:320px;font:inherit;line-height:1.6;color:var(
     <p>Questions? Email <a href="mailto:contact@gettransformativa.com">contact@gettransformativa.com</a>. <a href="../privacy.html">Privacy policy</a></p>
   </footer>
 </div>
-<script src="vendor/pdf.min.js"></script>
-<script src="extract.js?v=20261008b"></script>
 <script src="vendor/pdf-lib.min.js"></script>
-<script src="form.js?v=20261008b"></script>
-<script src="demo.js?v=20261008b"></script>
+<script src="vision.js?v=20261008c"></script>
+<script src="vision-page.js?v=20261008c"></script>
+<script src="signup.js?v=20261008c"></script>
 </body>
 </html>
