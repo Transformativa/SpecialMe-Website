@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Try the SpecialMe demo: pick a PDF and see the key dates, goals and next steps pulled out. It runs in your browser and nothing is uploaded.">
+<meta name="color-scheme" content="light dark">
+<title>SpecialMe demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&display=swap" rel="stylesheet">
+<style>
+/* Layout: left-aligned editorial page. Hero pairs a headline with a made-up IEP page turning into a goal list; the rest is plain sections on a cool ground, one deep-teal band for privacy. */
+:root{
+  --bg:#F2F6F8; --surface:#FFFFFF; --ink:#10242C; --muted:#4A5F68; --line:#D0DCE1;
+  --accent:#0F6F7A; --accent-ink:#FFFFFF; --accent-soft:#D4EDEF;
+  --deep:#0B3A42; --deep-ink:#E8F4F6; --deep-muted:#A9C7CD; --mark:#FFE9A6; --shadow:0 12px 32px rgba(16,36,44,.12);
+  --f-display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B181E; --surface:#13252C; --ink:#E6F0F3; --muted:#9BB2BB; --line:#2A424C;
+  --accent:#4FC3CF; --accent-ink:#04262B; --accent-soft:#143A41;
+  --deep:#0F2E35; --deep-ink:#E6F0F3; --deep-muted:#9BB8BF; --mark:#5B4B10; --shadow:0 12px 32px rgba(0,0,0,.4);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B181E; --surface:#13252C; --ink:#E6F0F3; --muted:#9BB2BB; --line:#2A424C;
+  --accent:#4FC3CF; --accent-ink:#04262B; --accent-soft:#143A41;
+  --deep:#0F2E35; --deep-ink:#E6F0F3; --deep-muted:#9BB8BF; --mark:#5B4B10; --shadow:0 12px 32px rgba(0,0,0,.4);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.55 var(--f-body);margin:0;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.1;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+.wrap{width:100%;max-width:1060px;margin-inline:auto;padding-inline:20px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:16px}
+.mark{font:700 20px var(--f-display);letter-spacing:-.02em;text-decoration:none}
+.mark b{color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:700;text-decoration:none;border:2px solid var(--accent);text-align:center}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.small{min-height:42px;padding:0 16px;font-size:15px}
+.btn.inv{background:var(--deep-ink);color:var(--deep);border-color:var(--deep-ink)}
+.btn[aria-disabled="true"]{opacity:.6;pointer-events:none}
+.fine{font-size:14px;color:var(--muted);margin-top:14px;max-width:46ch}
+.kicker{font:700 13px var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+footer{padding-block:32px 40px;color:var(--muted);font-size:14px}
+footer p+p{margin-top:8px}
+.form{display:grid;gap:16px;margin-top:28px;max-width:520px}
+.form label.f{display:grid;gap:6px;font-weight:700}
+.form label.f span.opt{font-weight:400;color:var(--muted)}
+.form input[type=text],.form input[type=email],.form select{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;min-height:50px;padding:0 14px;width:100%}
+.form input:focus-visible,.form select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.form .check{display:flex;gap:12px;align-items:flex-start;font-weight:400;color:var(--muted);font-size:15px}
+.form .check input{width:24px;height:24px;flex:none;margin-top:1px;accent-color:var(--accent)}
+.form .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.msg{padding:14px 16px;border-radius:12px;border:2px solid var(--line);max-width:520px;margin-top:20px}
+.msg.ok{border-color:var(--accent);background:var(--accent-soft)}
+.msg.bad{border-color:#B3261E}
+
+section.blk{padding-block:clamp(28px,5vw,56px)}
+h1{font-size:clamp(2rem,6vw,3.2rem)}
+.lede{font-size:clamp(1.05rem,2.4vw,1.2rem);color:var(--muted);margin-top:14px;max-width:56ch}
+.banners{display:grid;gap:10px;margin-top:22px;max-width:62ch}
+.note{border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 16px;font-size:15px}
+.note b{font-weight:700}
+.note.warn{border-color:#B7791F;background:var(--mark)}
+.drop{margin-top:26px;border:3px dashed var(--line);border-radius:16px;background:var(--surface);padding:28px 20px;text-align:center}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop p{margin-bottom:14px;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.samples{margin-top:18px;color:var(--muted);font-size:15px;text-align:center}
+.samples a{color:var(--accent);font-weight:700}
+button.btn{cursor:pointer;font:inherit;font-weight:700}
+button.btn:disabled{opacity:.6;cursor:default}
+input[type=file]{position:absolute;left:-9999px}
+.status{min-height:1.6em;margin-top:14px;text-align:center;font-weight:700}
+.status.bad{color:#B3261E}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .status.bad{color:#FF8A80}}
+#results[hidden],#plan[hidden]{display:none}
+.docline{color:var(--muted);font-size:15px;margin-bottom:14px}
+.cards{display:grid;gap:16px}
+@media (min-width:860px){.cards{grid-template-columns:1fr 1fr}.cards .card:first-child{grid-column:1/-1}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+.card h3{font-size:1.25rem}
+.hint{color:var(--muted);font-size:14px;margin-top:4px}
+ul.plain{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:10px}
+ul.plain li{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;padding-bottom:10px;border-bottom:1px solid var(--line)}
+ul.plain li:last-child{border-bottom:0;padding-bottom:0}
+.mini{flex:none;font:700 13px var(--f-body);min-height:36px;padding:0 12px;border-radius:10px;border:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+.mini:disabled{opacity:.6;cursor:default}
+.raw{margin-top:16px}.raw summary{cursor:pointer;font-weight:700}
+.raw pre{white-space:pre-wrap;word-break:break-word;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;max-height:360px;overflow:auto;font-size:13px}
+#plan{margin-top:24px;background:var(--accent-soft);border:2px solid var(--accent);border-radius:14px;padding:18px 20px}
+#plan ul{margin:10px 0 14px;padding-left:20px}
+.join{background:var(--deep);color:var(--deep-ink)}
+.join .lede{color:var(--deep-muted)}
+.join .form input[type=text],.join .form input[type=email],.join .form select{background:var(--surface);color:var(--ink)}
+.join .form .check,.join .fine{color:var(--deep-muted)}
+.join .msg{background:var(--surface);color:var(--ink)}
+@media print{header,.drop,.samples,.join,footer,.banners,#cards,.docline,.raw,#status{display:none!important}#plan{border:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><a class="mark" href="../">SpecialMe</a><a class="btn small" href="#join">Join the trial</a></header>
+  <section class="blk">
+    <p class="kicker">Demo</p>
+    <h1>See what SpecialMe pulls out of a school document.</h1>
+    <p class="lede">Choose a PDF, like an IEP or a notice from the school. In a few seconds you get the key dates, goals, services and next steps in plain words.</p>
+    <div class="banners">
+      <p class="note"><b>Your file stays on your device.</b> It is read inside this web page. It is not uploaded, saved or sent to us.</p>
+      <p class="note"><b>This demo does not use AI.</b> It looks for the usual headings and wording in these forms, so it can miss things. The full app will do more and will always show you where each item came from.</p>
+      <p class="note warn"><b>Please do not use a real record yet.</b> We have not finished our privacy and security review for family records. Use the sample documents below, or a copy with names and ID numbers removed.</p>
+    </div>
+
+    <div class="drop" id="drop">
+      <p>Drop a PDF here, or choose one.</p>
+      <div class="row">
+        <label class="btn" for="file" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">Choose a PDF</label>
+        <input id="file" type="file" accept="application/pdf,.pdf">
+        <button class="btn ghost" id="s1" type="button">Try the sample notice</button>
+        <button class="btn ghost" id="s2" type="button">Try the sample IEP</button>
+      </div>
+      <p class="samples">Samples are made up. Download them: <a href="samples/sample-amendment-notice.pdf" download>notice</a> · <a href="samples/sample-iep-goals.pdf" download>IEP</a></p>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="blk" id="results" hidden>
+    <h2>What we found</h2>
+    <p class="docline" id="docline"></p>
+    <div class="cards" id="cards"></div>
+    <div id="plan" hidden>
+      <h3>My plan</h3>
+      <ul id="planlist"></ul>
+      <div class="row" style="justify-content:flex-start"><button class="btn small" id="planprint" type="button">Print</button><button class="btn small ghost" id="plancopy" type="button">Copy as text</button></div>
+      <p class="hint">This list is only on this page. It disappears when you close it. The full app will keep it for you.</p>
+    </div>
+  </section>
+</div>
+
+<section class="join blk" id="join">
+  <div class="wrap">
+    <p class="kicker" style="color:var(--deep-muted)">Trial</p>
+    <h2>Want to try the real thing?</h2>
+    <p class="lede">We are looking for a small group of families to try the first version. Joining is free and does not commit you to anything.</p>
+    <form class="form" id="signup" novalidate>
+      <label class="f" for="email">Email <input id="email" name="email" type="email" autocomplete="email" required></label>
+      <label class="f" for="first">First name <span class="opt">(optional)</span><input id="first" name="first" type="text" autocomplete="given-name" maxlength="80"></label>
+      <label class="f" for="role">I am a
+        <select id="role" name="role">
+          <option value="parent">Parent or guardian of a child</option>
+          <option value="adult_caregiver">Family member or caregiver of an adult</option>
+          <option value="professional">Therapist, teacher or other professional</option>
+          <option value="other">Something else</option>
+        </select>
+      </label>
+      <label class="f hp" aria-hidden="true">Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+      <label class="check"><input type="checkbox" id="consent" name="consent" required><span>I agree to be emailed about the SpecialMe trial and launch. I can ask to be removed at any time by emailing contact@gettransformativa.com. <a href="../privacy.html">Privacy policy</a></span></label>
+      <div><button class="btn inv" type="submit" id="go">Join the trial</button></div>
+    </form>
+    <div id="result" role="status" aria-live="polite"></div>
+    <p class="fine">Please do not put health or school details about your child in this form. We only collect your email, first name and the type of person you are.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer>
+    <p>SpecialMe is in development. This demo is a preview and may be wrong. © 2026 Transformativa LLC.</p>
+    <p>General information only. Not medical, legal or educational advice. Always check the original document.</p>
+    <p>Questions? Email <a href="mailto:contact@gettransformativa.com">contact@gettransformativa.com</a>. <a href="../privacy.html">Privacy policy</a></p>
+  </footer>
+</div>
+<script src="vendor/pdf.min.js"></script>
+<script src="extract.js"></script>
+<script src="demo.js"></script>
+</body>
+</html>
