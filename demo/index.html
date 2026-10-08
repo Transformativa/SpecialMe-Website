@@ -6,6 +6,14 @@
 <meta name="description" content="Try the SpecialMe demo: pick a PDF and see the key dates, goals and next steps pulled out. It runs in your browser and nothing is uploaded.">
 <meta name="color-scheme" content="light dark">
 <title>SpecialMe demo</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta name="theme-color" content="#0B3A42">
+<meta property="og:type" content="website"><meta property="og:site_name" content="SpecialMe">
+<meta property="og:title" content="SpecialMe demo"><meta property="og:description" content="Pick a PDF and see the key dates, goals and next steps pulled out. It runs in your browser and nothing is uploaded.">
+<meta property="og:image" content="https://specialme.app/og-image.png"><meta name="twitter:card" content="summary_large_image">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&display=swap" rel="stylesheet">
@@ -36,8 +44,11 @@ p{margin:0}a{color:inherit}
 :focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
 .wrap{width:100%;max-width:1060px;margin-inline:auto;padding-inline:20px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:16px}
-.mark{font:700 20px var(--f-display);letter-spacing:-.02em;text-decoration:none}
+.mark{display:inline-flex;align-items:center;gap:12px;font:700 24px var(--f-display);letter-spacing:-.02em;text-decoration:none;line-height:1}
 .mark b{color:var(--accent)}
+.mark .lg{width:40px;height:40px;flex:none}.mark .mono{display:none}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mark .tile{display:none}:root:not([data-theme="light"]) .mark .mono{display:block}}
+:root[data-theme="dark"] .mark .tile{display:none}:root[data-theme="dark"] .mark .mono{display:block}
 .btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:700;text-decoration:none;border:2px solid var(--accent);text-align:center}
 .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 .btn.small{min-height:42px;padding:0 16px;font-size:15px}
@@ -98,6 +109,7 @@ ul.plain li:last-child{border-bottom:0;padding-bottom:0}
 #plan{margin-top:24px;background:var(--accent-soft);border:2px solid var(--accent);border-radius:14px;padding:18px 20px}
 #plan ul{margin:10px 0 14px;padding-left:20px}
 .join{background:var(--deep);color:var(--deep-ink)}
+.join h2::after{content:"";display:block;width:64px;height:5px;background:#F2C14E;border-radius:3px;margin-top:16px}
 .join .lede{color:var(--deep-muted)}
 .join .form input[type=text],.join .form input[type=email],.join .form select{background:var(--surface);color:var(--ink)}
 .join .form .check,.join .fine{color:var(--deep-muted)}
@@ -107,7 +119,7 @@ ul.plain li:last-child{border-bottom:0;padding-bottom:0}
 </head>
 <body>
 <div class="wrap">
-  <header class="top"><a class="mark" href="../">SpecialMe</a><a class="btn small" href="#join">Join the trial</a></header>
+  <header class="top"><a class="mark" href="../" aria-label="SpecialMe home"><svg class="lg tile" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#0B3A42"/><circle cx="32" cy="23" r="8" fill="#F2C14E"/><path d="M14 36A18 18 0 0 0 50 36" fill="none" stroke="#5BC8D4" stroke-width="5" stroke-linecap="round"/></svg><svg class="lg mono" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="23" r="8" fill="#E8F4F6"/><path d="M14 36A18 18 0 0 0 50 36" fill="none" stroke="#E8F4F6" stroke-width="5" stroke-linecap="round"/></svg><span>Special<b>Me</b></span></a><a class="btn small" href="#join">Join the trial</a></header>
   <section class="blk">
     <p class="kicker">Demo</p>
     <h1>See what SpecialMe pulls out of a school document.</h1>

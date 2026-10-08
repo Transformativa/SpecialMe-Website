@@ -5,8 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>SpecialMe privacy policy</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0B3A42">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&display=swap" rel="stylesheet">
+<meta property="og:type" content="website"><meta property="og:site_name" content="SpecialMe">
+<meta property="og:title" content="SpecialMe privacy policy"><meta property="og:description" content="How SpecialMe handles your information.">
+<meta property="og:image" content="https://specialme.app/og-image.png"><meta name="twitter:card" content="summary_large_image">
+
 <style>
-:root{--bg:#F2F6F8;--ink:#10242C;--muted:#4A5F68;--line:#D0DCE1;--accent:#0F6F7A}
+:root{--f-d:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;--bg:#F2F6F8;--ink:#10242C;--muted:#4A5F68;--line:#D0DCE1;--accent:#0F6F7A}
 @media (prefers-color-scheme:dark){:root{--bg:#0B181E;--ink:#E6F0F3;--muted:#9BB2BB;--line:#2A424C;--accent:#4FC3CF}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -16,13 +26,18 @@ h2{font-size:1.25rem;margin:32px 0 6px}
 p,li{color:var(--ink)}
 .muted{color:var(--muted)}
 a{color:var(--accent)}
+.mark{display:inline-flex;align-items:center;gap:12px;font:700 24px var(--f-d);letter-spacing:-.02em;text-decoration:none;line-height:1}
+.mark b{color:var(--accent)}
+.mark .lg{width:40px;height:40px;flex:none}.mark .mono{display:none}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mark .tile{display:none}:root:not([data-theme="light"]) .mark .mono{display:block}}
+:root[data-theme="dark"] .mark .tile{display:none}:root[data-theme="dark"] .mark .mono{display:block}
 :focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
 ul{padding-left:22px}
 </style>
 </head>
 <body>
 <main>
-<p><a href="./">&larr; SpecialMe</a></p>
+<p><a href="./" class="mark" aria-label="SpecialMe home"><svg class="lg tile" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#0B3A42"/><circle cx="32" cy="23" r="8" fill="#F2C14E"/><path d="M14 36A18 18 0 0 0 50 36" fill="none" stroke="#5BC8D4" stroke-width="5" stroke-linecap="round"/></svg><svg class="lg mono" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="23" r="8" fill="#E8F4F6"/><path d="M14 36A18 18 0 0 0 50 36" fill="none" stroke="#E8F4F6" stroke-width="5" stroke-linecap="round"/></svg><span>Special<b>Me</b></span></a></p>
 <h1>Privacy policy</h1>
 <p class="muted">Effective October 8, 2026. This covers the SpecialMe launch website only, not the app, which is not yet available. The app will have its own privacy policy before anyone uses it.</p>
 

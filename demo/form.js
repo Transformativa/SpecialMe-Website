@@ -108,7 +108,15 @@
         }
 
         newPage();
-        page.drawText('SpecialMe Care Summary', { x: M, y: y - 22, size: 22, font: bold, color: teal }); y -= 30;
+        // logo: deep tile, gold head, cyan cradle (the SpecialMe mark), then the wordmark
+        var sc = 0.75, top = y;
+        page.drawSvgPath('M16 0H48A16 16 0 0 1 64 16V48A16 16 0 0 1 48 64H16A16 16 0 0 1 0 48V16A16 16 0 0 1 16 0Z', { x: M, y: top, scale: sc, color: PL.rgb(0.043, 0.227, 0.259), borderWidth: 0 });
+        page.drawCircle({ x: M + 32 * sc, y: top - 23 * sc, size: 8 * sc, color: PL.rgb(0.949, 0.757, 0.306) });
+        page.drawSvgPath('M14 36A18 18 0 0 0 50 36', { x: M, y: top, scale: sc, borderColor: PL.rgb(0.357, 0.784, 0.831), borderWidth: 5 * sc, borderLineCap: PL.LineCapStyle.Round });
+        page.drawText('Special', { x: M + 60, y: top - 30, size: 24, font: bold, color: ink });
+        page.drawText('Me', { x: M + 60 + bold.widthOfTextAtSize('Special', 24), y: top - 30, size: 24, font: bold, color: teal });
+        page.drawText('Care Summary', { x: M + 60 + bold.widthOfTextAtSize('SpecialMe', 24) + 14, y: top - 30, size: 14, font: reg, color: grey });
+        y -= 56;
         page.drawText(win('One page of the basics to share with a school, clinic or caregiver. You can type in the boxes and save.'), { x: M, y: y - 10, size: 9.5, font: reg, color: grey }); y -= 22;
 
         if (filled) {
