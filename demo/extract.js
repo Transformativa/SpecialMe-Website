@@ -208,6 +208,41 @@
     return out.length > maxChars ? out.slice(0, maxChars - 1).replace(/\s+\S*$/, '') + '…' : out;
   }
 
+
+  /* Clean, de-duplicate and condense a list of accommodations. */
+  var SYN = { directions: 'instructions', direction: 'instructions', instruction: 'instructions', cue: 'cues', cueing: 'cues', reminder: 'reminders', visual: 'visuals', break: 'breaks', stories: 'story', activity: 'activities', task: 'tasks', worksheet: 'worksheets' };
+  var STOP = /^(use|of|provide|allow|access|to|the|a|an|and|or|for|with|in|on|at|by|as|needed|if|when|option|extra|more|using|student|his|her|their|danny)$/;
+  function accTokens(t) {
+    return t.toLowerCase().replace(/[^a-z0-9\s\/]/g, ' ').split(/[\s\/]+/).filter(function (w) { return w && !STOP.test(w); }).map(function (w) { w = w.replace(/(ing|ed|s)$/, function (m) { return w.length > 5 ? '' : m; }); return SYN[w] || w; });
+  }
+  function condenseAccommodations(list) {
+    var LABELS = /\s+(?:Social\/ ?Behavioral|Social\/ ?Behavior|Social Behavior|Fine Motor\/ ?Sensory|Gross Motor|Communication and Fine|Motor\/ ?Sensory)(?=[,.\s]|$)[,.]?/g;
+    var cleaned = [];
+    list.forEach(function (raw) {
+      var t = raw.replace(/\s+(Instruction|Response|Timing|Setting|Environment)$/, '').replace(LABELS, ' ').replace(/\s+/g, ' ').trim();
+      t = t.replace(/\s+To (?:promote|support)\b.*$/i, '').trim();
+      if (/\s[-•–]\s?[A-Za-z]/.test(t) || /:$/.test(t)) return;            // columns run together
+      if (/\b(as|a|an|the|to|and|or|of|with|for|in|on|at|by|such|when|is|are|that)$/i.test(t)) return;               // cut off mid-sentence
+      if (t.length < 8) return;
+      cleaned.push(t.replace(/\.$/, ''));
+    });
+    var items = cleaned.map(function (t) { var k = accTokens(t), o = {}; k.forEach(function (w) { o[w] = 1; }); return { t: t, set: o, n: Object.keys(o).length }; });
+    var drop = {};
+    for (var i = 0; i < items.length; i++) {
+      for (var j = 0; j < items.length; j++) {
+        if (i === j || drop[i] || drop[j] || !items[i].n || !items[j].n) continue;
+        var a = items[i], b = items[j], inter = 0;
+        Object.keys(a.set).forEach(function (w) { if (b.set[w]) inter++; });
+        var contain = inter / Math.min(a.n, b.n), jac = inter / (a.n + b.n - inter);
+        if (contain >= 0.99 || jac >= 0.7 || (contain >= 0.8 && Math.min(a.n, b.n) >= 4)) {
+          // keep the longer, more complete wording
+          if (a.t.length > b.t.length || (a.t.length === b.t.length && i < j)) drop[j] = 1; else drop[i] = 1;
+        }
+      }
+    }
+    return items.filter(function (x, k) { return !drop[k]; }).map(function (x) { return x.t; });
+  }
+
   function analyzeIepForm(rawClean) {
     var lines = rawClean.split('\n'), text = plainOf(rawClean).replace(/\n{3,}/g, '\n\n'), o = {};
     // disabilities
@@ -329,6 +364,7 @@
         });
       });
     }
+    o.accommodations = condenseAccommodations(o.accommodations);
     // additional information
     var add = between(text, /ADDITIONAL INFORMATION/, /RESPONSE SECTION/).replace(/^[\s\S]*?and services\)\.\s*/, '').replace(/^Record other IEP information[\s\S]*?\)\.\s*/, '');
     o.additional = sentences(plainOf(add)).filter(function (x) { return x.length > 25; }).map(function (x) { return x.length > 280 ? x.slice(0, 279).replace(/\s+\S*$/, '') + '…' : x; }).slice(0, 10);
@@ -377,6 +413,7 @@
     if (res.reports) res.reports.dates = res.reports.dates.filter(isFuture).slice(0, 6);
     var dated = seenAll.filter(function (d) { return toDate(d); }).length;
     res.noFutureDates = dated > 0 && !res.deadlines.length && !res.datesMentioned.length && !(res.reports && res.reports.dates.length);
+    res.accommodations = condenseAccommodations(res.accommodations || []);
     res.actions = buildActions(res);
     res.summary = buildSummary(res);
     res.found = (res.diagnoses.length ? 1 : 0) + (res.recommendations.length ? 1 : 0) + (res.goals.length ? 1 : 0) + (res.services.length ? 1 : 0) + res.deadlines.length + (res.change.change ? 1 : 0);
@@ -488,7 +525,7 @@
   }
   function trim(s, n) { s = flat(s); return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s; }
 
-  var api = { analyze: analyze, isFuture: isFuture, stripRepeats: stripRepeats, clean: clean, pretty: pretty, toDate: toDate };
+  var api = { analyze: analyze, condenseAccommodations: condenseAccommodations, isFuture: isFuture, stripRepeats: stripRepeats, clean: clean, pretty: pretty, toDate: toDate };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.SpecialMeExtract = api;
 })(typeof self !== 'undefined' ? self : this);
