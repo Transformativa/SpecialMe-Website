@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SpecialMe is a new app that helps families organize care for children and adults with special needs. Launching soon. Join the trial.">
+<meta name="color-scheme" content="light dark">
+<title>SpecialMe: launching soon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&display=swap" rel="stylesheet">
+<style>
+/* Layout: left-aligned editorial page. Hero pairs a headline with a made-up IEP page turning into a goal list; the rest is plain sections on a cool ground, one deep-teal band for privacy. */
+:root{
+  --bg:#F2F6F8; --surface:#FFFFFF; --ink:#10242C; --muted:#4A5F68; --line:#D0DCE1;
+  --accent:#0F6F7A; --accent-ink:#FFFFFF; --accent-soft:#D4EDEF;
+  --deep:#0B3A42; --deep-ink:#E8F4F6; --deep-muted:#A9C7CD; --mark:#FFE9A6; --shadow:0 12px 32px rgba(16,36,44,.12);
+  --f-display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B181E; --surface:#13252C; --ink:#E6F0F3; --muted:#9BB2BB; --line:#2A424C;
+  --accent:#4FC3CF; --accent-ink:#04262B; --accent-soft:#143A41;
+  --deep:#0F2E35; --deep-ink:#E6F0F3; --deep-muted:#9BB8BF; --mark:#5B4B10; --shadow:0 12px 32px rgba(0,0,0,.4);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B181E; --surface:#13252C; --ink:#E6F0F3; --muted:#9BB2BB; --line:#2A424C;
+  --accent:#4FC3CF; --accent-ink:#04262B; --accent-soft:#143A41;
+  --deep:#0F2E35; --deep-ink:#E6F0F3; --deep-muted:#9BB8BF; --mark:#5B4B10; --shadow:0 12px 32px rgba(0,0,0,.4);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.55 var(--f-body);-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.08;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+.wrap{width:100%;max-width:1060px;margin-inline:auto;padding-inline:20px}
+section{padding-block:clamp(44px,7vw,88px)}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:16px}
+.mark{font:700 20px var(--f-display);letter-spacing:-.02em;text-decoration:none}
+.mark b{color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:700;text-decoration:none;border:2px solid var(--accent);text-align:center}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.small{min-height:42px;padding:0 16px;font-size:15px}
+.btn.inv{background:var(--deep-ink);color:var(--deep);border-color:var(--deep-ink)}
+.btn[aria-disabled="true"]{opacity:.6;pointer-events:none}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.fine{font-size:14px;color:var(--muted);margin-top:14px;max-width:46ch}
+.kicker{font:700 13px var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+
+.hero{display:grid;gap:40px;grid-template-columns:minmax(0,1fr);padding-top:clamp(20px,5vw,56px)}
+.hero h1{font-size:clamp(2.15rem,7vw,3.7rem);font-weight:700}
+.hero .lede{font-size:clamp(1.05rem,2.6vw,1.25rem);color:var(--muted);margin-top:20px;max-width:46ch}
+@media (min-width:860px){.hero{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);align-items:center;gap:56px}}
+
+.demo{margin:0;display:flex;flex-direction:column;gap:12px;min-width:0}
+.paper{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 18px 20px;box-shadow:var(--shadow);transform:rotate(-1deg)}
+.paper .tag,.out .tag{font:700 12px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:block}
+.bar{height:8px;border-radius:4px;background:var(--line);margin:10px 0}
+.bar.s{width:62%}.bar.m{width:84%}
+.paper p{font-size:15px;line-height:1.5;margin:10px 0}
+.paper mark{background:var(--mark);color:var(--ink);padding:1px 3px;border-radius:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.arrow{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;color:var(--accent);padding-left:6px}
+.arrow svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.out{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+.out h3{font-size:19px;margin-bottom:4px}
+.out .sub{font-size:14px;color:var(--muted);margin-bottom:8px}
+.out ul{list-style:none;margin:0;padding:0}
+.out li{display:flex;gap:12px;align-items:baseline;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}
+.out li span:first-child{min-width:0;overflow-wrap:anywhere}
+.out li small{display:block;color:var(--muted);font-size:13px}
+.chip{flex:none;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.demo figcaption{font-size:13px;color:var(--muted)}
+
+.split{display:grid;gap:28px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:860px){.split{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:56px}}
+h2{font-size:clamp(1.7rem,4.6vw,2.5rem);font-weight:700}
+.pains{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line)}
+.pains p{padding:16px 0;border-bottom:1px solid var(--line);font-size:1.08rem}
+
+.steps{list-style:none;margin:32px 0 0;padding:0;display:grid;gap:28px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:860px){.steps{grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}}
+.steps li{display:flex;flex-direction:column;gap:8px}
+.steps .n{font:700 44px/1 var(--f-display);color:var(--accent)}
+.steps h3{font-size:22px}
+.steps p{color:var(--muted)}
+
+.lists{display:grid;gap:36px;grid-template-columns:minmax(0,1fr);margin-top:30px}
+@media (min-width:860px){.lists{grid-template-columns:repeat(2,minmax(0,1fr));gap:56px}}
+.lists h3{font-size:20px;margin-bottom:6px}
+.lists .note{color:var(--muted);font-size:15px;margin-bottom:10px}
+dl{margin:0}
+dl>div{padding:14px 0;border-top:1px solid var(--line)}
+dt{font:700 18px var(--f-display)}
+dd{margin:2px 0 0;color:var(--muted)}
+
+.who{display:grid;gap:24px;grid-template-columns:minmax(0,1fr);margin-top:28px}
+@media (min-width:760px){.who{grid-template-columns:repeat(2,minmax(0,1fr));gap:48px}}
+.who h3{font-size:22px;margin-bottom:6px}
+.who p{color:var(--muted)}
+
+.deep{background:var(--deep);color:var(--deep-ink)}
+.deep .kicker{color:var(--deep-muted)}
+.deep h2{max-width:20ch}
+.pledges{list-style:none;margin:32px 0 0;padding:0;display:grid;gap:0;grid-template-columns:minmax(0,1fr)}
+@media (min-width:760px){.pledges{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:48px}}
+.pledges li{padding:16px 0;border-top:1px solid rgba(255,255,255,.2)}
+.pledges b{display:block;font:700 19px var(--f-display);margin-bottom:2px}
+.pledges span{color:var(--deep-muted)}
+.deep .fine{color:var(--deep-muted);max-width:62ch;margin-top:26px}
+
+details{border-top:1px solid var(--line)}
+details:last-of-type{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;list-style:none;padding:18px 0;font:700 19px var(--f-display);display:flex;justify-content:space-between;gap:16px;align-items:center;min-height:56px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font:400 26px var(--f-body);color:var(--accent);flex:none}
+details[open] summary::after{content:"\2212"}
+details p{padding:0 0 18px;color:var(--muted);max-width:62ch}
+.faq{margin-top:26px}
+
+.join{background:var(--surface);border-block:1px solid var(--line)}
+.join h2{max-width:18ch}
+.join p.lede{color:var(--muted);margin-top:14px;max-width:48ch}
+footer{padding-block:32px 40px;color:var(--muted);font-size:14px}
+footer p+p{margin-top:8px}
+
+.form{display:grid;gap:16px;margin-top:28px;max-width:520px}
+.form label.f{display:grid;gap:6px;font-weight:700}
+.form label.f span.opt{font-weight:400;color:var(--muted)}
+.form input[type=text],.form input[type=email],.form select{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;min-height:50px;padding:0 14px;width:100%}
+.form input:focus-visible,.form select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.form .check{display:flex;gap:12px;align-items:flex-start;font-weight:400;color:var(--muted);font-size:15px}
+.form .check input{width:24px;height:24px;flex:none;margin-top:1px;accent-color:var(--accent)}
+.form .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.msg{padding:14px 16px;border-radius:12px;border:2px solid var(--line);max-width:520px;margin-top:20px}
+.msg.ok{border-color:var(--accent);background:var(--accent-soft)}
+.msg.bad{border-color:#B3261E}
+button.btn{font:inherit;font-weight:700;cursor:pointer}
+button.btn:disabled{opacity:.6;cursor:wait}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <a class="mark" href="#top" id="top">SpecialMe</a>
+    <a class="btn small join-link" href="#join">Join the trial</a>
+  </header>
+
+  <section class="hero" style="padding-bottom:clamp(30px,5vw,60px)">
+    <div>
+      <p class="kicker">For families of children and adults with special needs</p>
+      <h1>Get your child’s care out of the binder.</h1>
+      <p class="lede">Upload an IEP or therapy report and SpecialMe pulls out what your child is working on. Keep medications, appointments and goals in one place, and share only what you choose with the people who help.</p>
+      <div class="ctas">
+        <a class="btn join-link" href="#join">Join the trial</a>
+        <a class="btn ghost" href="#how">See how it works</a>
+      </div>
+      <p class="fine">Launching soon. We are looking for a small group of families to try the first version and tell us what to fix. Nothing here is final.</p>
+    </div>
+
+    <figure class="demo" aria-label="Example: a page from an IEP turned into a short list of goals and services">
+      <div class="paper">
+        <span class="tag">Example IEP page</span>
+        <div class="bar m"></div>
+        <p><mark>By March, Maya will ask an adult for help using a full sentence in 4 of 5 tries.</mark></p>
+        <div class="bar s"></div>
+        <p><mark>Speech-language therapy, 30 minutes, twice a week.</mark></p>
+        <div class="bar m"></div>
+        <p><mark>Maya will zip and button her jacket with no more than one prompt.</mark></p>
+      </div>
+      <div class="arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6"/></svg>SpecialMe reads it</div>
+      <div class="out">
+        <span class="tag">What Maya is working on</span>
+        <p class="sub">You review each item before it is saved.</p>
+        <ul>
+          <li><span>Ask for help in a full sentence<small>4 of 5 tries by March</small></span><span class="chip">Speech goal</span></li>
+          <li><span>Speech-language therapy<small>30 minutes, twice a week</small></span><span class="chip">Service</span></li>
+          <li><span>Zip and button her own jacket<small>With one prompt or fewer</small></span><span class="chip">Daily living</span></li>
+        </ul>
+      </div>
+      <figcaption>Example with a made-up child and made-up details.</figcaption>
+    </figure>
+  </section>
+</div>
+
+<section style="border-top:1px solid var(--line)">
+  <div class="wrap split">
+    <div>
+      <p class="kicker">The problem</p>
+      <h2>Care for a child with special needs runs on paperwork.</h2>
+    </div>
+    <div class="pains">
+      <p>Reports arrive as scanned PDFs that nobody can search.</p>
+      <p>Every new provider asks you to tell the whole story again.</p>
+      <p>Deadlines, doses and appointments live in five different places.</p>
+      <p>Sharing with grandparents or a teacher means forwarding everything or nothing.</p>
+    </div>
+  </div>
+</section>
+
+<section id="how" style="border-top:1px solid var(--line)">
+  <div class="wrap">
+    <p class="kicker">How it works</p>
+    <h2>Three steps from paper to a plan you can use.</h2>
+    <ol class="steps">
+      <li><span class="n" aria-hidden="true">1</span><h3>Upload</h3><p>Add an IEP, an evaluation, or an OT, PT or speech report. Scans and photos are fine.</p></li>
+      <li><span class="n" aria-hidden="true">2</span><h3>Review</h3><p>SpecialMe suggests goals, services and dates. You check each one and fix anything that is off.</p></li>
+      <li><span class="n" aria-hidden="true">3</span><h3>Share</h3><p>Invite family, teachers and therapists. You pick which sections each person can see, and you can remove them any time.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section style="border-top:1px solid var(--line)">
+  <div class="wrap">
+    <p class="kicker">What we are building</p>
+    <h2>One place for the whole picture.</h2>
+    <div class="lists">
+      <div>
+        <h3>Planned for launch</h3>
+        <p class="note">The first version focuses on these.</p>
+        <dl>
+          <div><dt>Document reading</dt><dd>Pulls goals, services and dates out of IEPs and reports.</dd></div>
+          <div><dt>Progress tracking</dt><dd>Log how independent your child was on each goal over time.</dd></div>
+          <div><dt>Medications</dt><dd>Doses, times and refill warnings, checked off as given.</dd></div>
+          <div><dt>Appointments and tasks</dt><dd>One schedule with overlap warnings.</dd></div>
+          <div><dt>Sharing and messages</dt><dd>Per-section access for the people who help.</dd></div>
+        </dl>
+      </div>
+      <div>
+        <h3>Coming after launch</h3>
+        <p class="note">On the list, with no dates yet.</p>
+        <dl>
+          <div><dt>Google Calendar sync</dt><dd>With generic event titles, so no details leave the app.</dd></div>
+          <div><dt>Form help</dt><dd>Pre-fills the forms schools and therapists send, using answers you have already given. You review everything before it goes anywhere.</dd></div>
+          <div><dt>Comparing IEPs</dt><dd>See what changed between this year’s plan and last year’s.</dd></div>
+          <div><dt>Phone reminders</dt><dd>Push notifications for doses and appointments.</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="border-top:1px solid var(--line)">
+  <div class="wrap">
+    <p class="kicker">Who it is for</p>
+    <h2>Children now, and adults who still need the same support.</h2>
+    <div class="who">
+      <div><h3>Children with IEPs</h3><p>Each child gets a profile with school goals, therapy reports, medications and a care team. Siblings get their own profiles.</p></div>
+      <div><h3>Adults with intellectual and developmental disabilities</h3><p>Families and caregivers share medications, schedules and appointments, with consent and legal authority recorded for each adult.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="deep">
+  <div class="wrap">
+    <p class="kicker">Privacy</p>
+    <h2>Your child’s records are not our business model.</h2>
+    <ul class="pledges">
+      <li><b>No ads, no selling data</b><span>Families pay for the app. Nothing else pays for it.</span></li>
+      <li><b>You decide who sees what</b><span>Share sections one person at a time and take access back whenever you want.</span></li>
+      <li><b>Export and delete</b><span>Download your records or delete them, including after you cancel.</span></li>
+      <li><b>Built to HIPAA standards</b><span>We are designing for HIPAA-level protection and will sign agreements with our vendors before launch.</span></li>
+    </ul>
+    <p class="fine">AI reads your documents to suggest what goes in your child’s profile. It can make mistakes, which is why you review every item.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap split">
+    <div>
+      <p class="kicker">Questions</p>
+      <h2>Before you sign up.</h2>
+    </div>
+    <div class="faq">
+      <details><summary>Is SpecialMe available now?</summary><p>No. We are building it and collecting families for the first trial. Joining the trial list is free and does not commit you to anything.</p></details>
+      <details><summary>What do trial families get?</summary><p>Early access, and a say in what we build. We will share any early pricing by email before anyone is asked to pay.</p></details>
+      <details><summary>What will it cost?</summary><p>Pricing is not final. It will be a simple yearly or monthly plan per person, and invited family, teachers and therapists will be able to view for free.</p></details>
+      <details><summary>Which documents does it read?</summary><p>IEPs, evaluations, and OT, PT and speech reports, including scans. You always review what it finds before it is saved.</p></details>
+      <details><summary>Is it only for children?</summary><p>No. Adults with intellectual and developmental disabilities will get their own profiles for medications, schedules and appointments.</p></details>
+      <details><summary>Is this medical or legal advice?</summary><p>No. SpecialMe helps you organize information and understand documents. It does not replace your child’s doctors, therapists, school team or an advocate.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="join" id="join">
+  <div class="wrap">
+    <p class="kicker">Trial and demo</p>
+    <h2>Help us test the first version.</h2>
+    <p class="lede">Tell us you are interested and we will email you when the trial opens, and about a demo if you would like one. Joining is free and does not commit you to anything.</p>
+    <form class="form" id="signup" novalidate>
+      <label class="f" for="email">Email <input id="email" name="email" type="email" autocomplete="email" required></label>
+      <label class="f" for="first">First name <span class="opt">(optional)</span><input id="first" name="first" type="text" autocomplete="given-name" maxlength="80"></label>
+      <label class="f" for="role">I am a
+        <select id="role" name="role">
+          <option value="parent">Parent or guardian of a child</option>
+          <option value="adult_caregiver">Family member or caregiver of an adult</option>
+          <option value="professional">Therapist, teacher or other professional</option>
+          <option value="other">Something else</option>
+        </select>
+      </label>
+      <label class="f hp" aria-hidden="true">Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+      <label class="check"><input type="checkbox" id="consent" name="consent" required><span>I agree to be emailed about the SpecialMe trial and launch. I can ask to be removed at any time by replying to any email.</span></label>
+      <div><button class="btn" type="submit" id="go">Join the trial</button></div>
+    </form>
+    <div id="result" role="status" aria-live="polite"></div>
+    <p class="fine">Please do not put any health or school details about your child in this form. We only collect your email, first name and the type of person you are.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer>
+    <p>SpecialMe is in development. Features described here are planned and may change. © 2026 Transformativa LLC.</p>
+    <p>General information only. Not medical, legal or educational advice.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var URL_='https://zocypfuzifymtqyrzzvt.supabase.co', KEY='sb_publishable_8uO3u--OIRwSukiAXkZ47Q_kG0wJmBW';
+  var f=document.getElementById('signup'), out=document.getElementById('result'), btn=document.getElementById('go');
+  function show(kind,text){out.innerHTML='';var d=document.createElement('p');d.className='msg '+kind;d.textContent=text;out.appendChild(d);}
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(f.elements.website.value){show('ok','Thank you. You are on the list.');return;}
+    var email=f.elements.email.value.trim();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){show('bad','Please enter a valid email address.');f.elements.email.focus();return;}
+    if(!f.elements.consent.checked){show('bad','Please tick the box so we know it is okay to email you.');f.elements.consent.focus();return;}
+    btn.disabled=true;btn.textContent='Sending...';
+    fetch(URL_+'/rest/v1/trial_signups',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({email:email,first_name:f.elements.first.value.trim()||null,role:f.elements.role.value,consent:true})})
+    .then(function(r){
+      if(r.ok||r.status===409){f.reset();f.style.display='none';show('ok','Thank you. You are on the list, and we will email you when the trial opens.');}
+      else{show('bad','Something went wrong on our side. Please try again in a few minutes.');}
+    })
+    .catch(function(){show('bad','We could not reach the server. Please check your connection and try again.');})
+    .then(function(){btn.disabled=false;btn.textContent='Join the trial';});
+  });
+})();
+</script>
+</body>
+</html>
