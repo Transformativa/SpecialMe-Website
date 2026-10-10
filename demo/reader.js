@@ -38,25 +38,25 @@
   function loadScript(src) {
     return new Promise(function (ok, bad) { var t = document.createElement('script'); t.src = src; t.onload = ok; t.onerror = bad; document.head.appendChild(t); });
   }
-  function getOcr() {
+  function poolSize() { var c = navigator.hardwareConcurrency || 2; return Math.max(1, Math.min(3, Math.floor(c / 2))); }
+  function getPool(n) {
     if (ocrWorker) return ocrWorker;
     say('Getting the scan reader ready (one-time download, about 8 MB)…');
     ocrWorker = (window.Tesseract ? Promise.resolve() : loadScript('vendor/ocr/tesseract.min.js')).then(function () {
-      return window.Tesseract.createWorker('eng', 1, {
+      var ws = [];
+      for (var i = 0; i < n; i++) ws.push(window.Tesseract.createWorker('eng', 1, {
         workerPath: 'vendor/ocr/worker.min.js', corePath: 'vendor/ocr/', langPath: 'vendor/ocr/', gzip: true, workerBlobURL: false
-      });
+      }));
+      return Promise.all(ws);
     });
     ocrWorker.catch(function () { ocrWorker = null; });
     return ocrWorker;
   }
-  function ocrPage(page, label) {
+  function ocrPage(page, w) {
     var vp0 = page.getViewport({ scale: 1 });
     var vp = page.getViewport({ scale: Math.min(3, Math.max(1.5, 2200 / Math.max(vp0.width, vp0.height * 0.8))) });
     var cv = document.createElement('canvas'); cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
     return page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise.then(function () {
-      return getOcr();
-    }).then(function (w) {
-      say(label);
       return w.recognize(cv);
     }).then(function (r) {
       var sx = vp0.width / cv.width, sy = vp0.height / cv.height, d = r.data, out;
@@ -98,19 +98,31 @@
   function readPdf(buf) {
     return pdfjs.getDocument({ data: buf, isEvalSupported: false, disableFontFace: true }).promise.then(function (doc) {
       var n = Math.min(doc.numPages, MAX_PAGES), pages = [];
-      var chain = Promise.resolve(), scanned = 0, skipped = 0;
+      var chain = Promise.resolve(), scanned = 0, skipped = 0, jobs = [];
       function step(i) {
         return doc.getPage(i).then(function (pg) {
           return pageText(pg).then(function (txt) {
             if (txt.replace(/\s/g, '').length >= 40) { pages[i - 1] = txt; return; }
-            if (scanned >= MAX_OCR_PAGES) { skipped++; pages[i - 1] = ''; return; }
-            scanned++;
-            return ocrPage(pg, 'Reading scanned page ' + i + ' of ' + n + '… this takes a few seconds per page.').then(function (t) { pages[i - 1] = t; });
+            if (jobs.length >= MAX_OCR_PAGES) { skipped++; pages[i - 1] = ''; return; }
+            jobs.push({ i: i, pg: pg });
           });
         });
       }
       for (var i = 1; i <= n; i++) (function (k) { chain = chain.then(function () { return step(k); }); })(i);
-      return chain.then(function () { return { text: X.stripRepeats(pages.map(function (p) { return p || ''; })).join('\n\n'), pages: doc.numPages, scanned: scanned, skipped: skipped }; });
+      return chain.then(function () {
+        if (!jobs.length) return;
+        scanned = jobs.length;
+        return getPool(Math.min(poolSize(), jobs.length)).then(function (ws) {
+          var next = 0, done = 0;
+          say('Reading scanned pages: 0 of ' + jobs.length + ' done. This takes a few minutes for a long scan.');
+          function work(w) {
+            if (next >= jobs.length) return Promise.resolve();
+            var j = jobs[next++];
+            return ocrPage(j.pg, w).then(function (t) { pages[j.i - 1] = t; done++; say('Reading scanned pages: ' + done + ' of ' + jobs.length + ' done. This takes a few minutes for a long scan.'); }).then(function () { return work(w); });
+          }
+          return Promise.all(ws.slice(0, Math.min(ws.length, jobs.length)).map(work));
+        });
+      }).then(function () { return { text: X.stripRepeats(pages.map(function (p) { return p || ''; })).join('\n\n'), pages: doc.numPages, scanned: scanned, skipped: skipped }; });
     });
   }
 
